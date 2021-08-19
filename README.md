@@ -9,20 +9,26 @@ Solution: write a `--loader` that shims CJS modules loaded from ESM so they have
 When the ESM loader resolves something to be CommonJS, rewrite the resolution to an ESM shim.
 
 ESM shim does 2x things:
+```
 export * from 'esm-shim://export/<encoded payload>';
 import 'esm-shim://discover-exports/<encoded payload>';
+```
 
+```
 // //discover-exports/
 import cjs from 'commonjs-module';
 const allExports = Buffer.from(JSON.stringify(Object.keys(cjs)).toString('base64');
 await import(`esm-shim://report-exports/<unique ID>/${ allExports }`);
+```
 
+```
 // //export/
 import cjs from 'commonjs-module';
 const {foo, bar, baz} = cjs;
 export {foo, bar, baz};
+```
 
 For every CJS imported from ESM, there are 3x "virtual" modules created:
-esm-shim://export/
-esm-shim://discover-exports/
-esm-shim://report-exports/
+- esm-shim://export/
+- esm-shim://discover-exports/
+- esm-shim://report-exports/
